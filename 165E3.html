@@ -1,0 +1,752 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Style Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f7;
+            margin:0; padding:0;
+            overflow:hidden;
+        }
+
+        /* Intro page layout styles */
+        .intro-container {
+            width:100vw; height:100vh;
+            display:flex; flex-direction:column;
+            justify-content:center; align-items:center;
+            padding:20px; box-sizing:border-box;
+            background:#fff;
+        }
+
+        .intro-content {
+            max-width:800px;
+            background:#fafafa;
+            padding:30px;
+            border-radius:10px;
+            box-shadow:0 2px 4px rgba(0,0,0,0.1);
+            text-align: justify;
+            line-height:1.8;
+        }
+
+        .intro-content h1 {
+            font-size:28px; margin-bottom:20px; color:#007acc; text-align:center;
+        }
+
+        .intro-content p {
+            font-size:18px; color:#333; margin-bottom:20px; 
+        }
+
+        .intro-content ul {
+            margin-bottom:20px; padding-left:30px; 
+        }
+
+        .intro-content li {
+            font-size:18px; margin-bottom:10px; list-style: inside disc;
+        }
+
+        .intro-button-container {
+            text-align:center;
+        }
+
+        .next-arrow-btn {
+            display:inline-block; margin-top:20px; padding:10px 20px;
+            background:#007acc; color:#fff; text-decoration:none;
+            border-radius:50px; font-size:18px;
+            cursor:pointer; transition: background 0.3s;
+        }
+
+        .next-arrow-btn:hover {
+            background:#005fa3;
+        }
+
+        /* Chat interface and styles */
+        .chat-container {
+            width:100vw; height:100vh;
+            display:none; flex-direction:column; background:#fff;
+            position:relative;
+        }
+
+        .header {
+            display: flex; align-items: center; 
+            padding:10px 20px; background:#fff; border-bottom:1px solid #ddd;
+            width:100%; box-sizing:border-box;
+            position: fixed; top:0; left:0; z-index:999; 
+            height:70px;
+        }
+
+        /* Dynamic rotating star logo styles */
+        .star-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            animation: rotate 5s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h2 {
+            margin:0; font-size:24px; color:#333; 
+        }
+
+        .chat-content {
+            position:absolute; top:70px; bottom:70px; left:0; right:0;
+            overflow-y:auto; background:#fff;
+            display:flex; flex-direction:column; gap:20px;
+            width:100%; box-sizing:border-box; max-width:1200px; margin:0 auto; padding:20px;
+            background:#fff;
+            border:1px solid #ddd;
+            border-radius:10px;
+        }
+
+        .message {
+            max-width:80%; padding:15px 20px; border-radius:15px;
+            line-height:1.6; word-break:break-word; font-size:16px;
+            position:relative; animation: fadeIn 0.5s;  
+        }
+
+        .assistant-msg { background:#e1f5fe; color:#333; align-self:flex-start; }
+        .user-msg { background:#007acc; color:#fff; align-self:flex-end; }
+
+        @keyframes fadeIn {
+            from { opacity:0; transform: translateY(10px);}
+            to { opacity:1; transform:translateY(0);}
+        }
+
+        .chat-input-bar {
+            width:100%; max-width:1200px; margin:0 auto; 
+            position: fixed; bottom:0; left:0; right:0;
+            display:flex; gap:10px; border-top:1px solid #ddd; padding:10px; background:#fff; box-sizing:border-box;
+            justify-content:center; z-index:999;
+            height:70px;
+        }
+
+        .chat-input-bar input {
+            flex:1; padding:10px 15px; border:1px solid #ddd; border-radius:25px; font-size:16px; outline:none;
+        }
+
+        .chat-input-bar button {
+            background:#007acc; color:#fff; border:none; border-radius:25px; padding:10px 20px; cursor:pointer; font-size:16px;
+            transition: background 0.3s;
+        }
+
+        .chat-input-bar button:hover {
+            background:#005fa3;
+        }
+
+        .option-buttons,
+        .selection-container {
+            display:flex; gap:10px; flex-wrap:wrap; padding:10px 0;
+            max-width:500px;
+        }
+
+        .option-buttons button,
+        .selection-container button {
+            background:#eee; border:1px solid #ccc; border-radius:25px;
+            padding:10px 20px; cursor:pointer; font-size:16px;
+            transition: background 0.3s, color 0.3s;
+            white-space: normal;
+        }
+
+        .option-buttons button:hover,
+        .selection-container button:hover {
+            background:#007acc; color:white;
+        }
+
+        .recommendation-container {
+            display:flex; justify-content:space-between; gap:10px;
+            margin-top:20px; max-width:1200px; margin:20px auto 0 auto;
+            flex-wrap: nowrap; /* Prevent wrapping */
+            overflow-x: auto; /* Scrollable if content overflows */
+        }
+
+        .product-card {
+            background:#fff; border:1px solid #ddd; border-radius:5px;
+            padding:10px; text-align:center;
+            box-shadow:none;
+            transition: transform 0.3s;
+            width:250px; /* Increased width to fit in one row */
+            flex:0 0 auto;
+            cursor:pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .product-card img {
+            width:100%; height:auto; border-radius:5px; margin-bottom:5px;
+            cursor: pointer;
+        }
+
+        .product-card p {
+            margin:3px 0; font-size:14px; line-height:1.4; color:#333;
+        }
+
+        .product-card p.price {
+            font-size:14px; font-weight:bold; color:#555;
+        }
+
+        .done-button-container {
+            display:none; justify-content:center; margin-top:20px;
+        }
+
+        .done-button-container button {
+            background:#007acc; color:white; border:none; border-radius:25px; padding:8px 15px; cursor:pointer; font-size:14px;
+            transition: background 0.3s;
+        }
+
+        .done-button-container button:hover {
+            background:#005fa3;
+        }
+
+        .loading-dots {
+            display:inline-block;
+            width:4px; height:4px;
+            border-radius:50%;
+            background:#333;
+            animation:loading 1s infinite;
+            margin-left:3px;
+        }
+
+        .loading-dots:nth-child(2) { animation-delay:0.2s; }
+        .loading-dots:nth-child(3) { animation-delay:0.4s; }
+
+        @keyframes loading {
+            0% { opacity:0; transform:translateY(0); }
+            50% { opacity:1; transform:translateY(-3px); }
+            100% { opacity:0; transform:translateY(0); }
+        }
+
+        .product-details {
+            display: none;
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.5);
+            justify-content:center; align-items:center;
+            padding:40px; box-sizing:border-box; z-index:1000;
+        }
+
+        .product-details.visible {
+            display:flex;
+        }
+
+        .product-details-content {
+            background:white; border-radius:10px; max-width:1000px; width:100%;
+            display:flex; box-sizing:border-box; padding:40px; gap:40px; align-items:flex-start;
+        }
+
+        .details-left {
+            flex:1; text-align:center;
+        }
+
+        .details-left img {
+            max-width:100%; border-radius:10px; display:block; margin:0 auto;
+        }
+
+        .image-nav {
+            margin-top:20px; display:flex; justify-content:center; gap:20px;
+        }
+
+        .image-nav button {
+            padding:10px 15px; border:1px solid #ddd; background:#f5f5f7; border-radius:5px; cursor:pointer; font-size:16px;
+        }
+
+        .details-right {
+            flex:1; display:flex; flex-direction:column; align-items:flex-start; text-align:left;
+        }
+
+        .details-right h2 {
+            font-size:24px; font-weight:bold; margin-bottom:10px;
+        }
+
+        .details-right .price {
+            font-size:20px; font-weight:bold; margin-bottom:20px;
+        }
+
+        .details-right .size-label {
+            font-weight:bold; margin-bottom:10px; font-size:16px;
+        }
+
+        .details-right .sizes {
+            display:flex; gap:15px; margin-bottom:30px;
+        }
+
+        .details-right .sizes span {
+            padding:12px 20px; border:1px solid #ddd; border-radius:5px; cursor:pointer; font-size:16px; display:inline-block;
+        }
+
+        .details-right .sizes span:hover {
+            background:#e0e0e0;
+        }
+
+        .details-right .cart-message {
+            background:#cce5ff; color:#004085; padding:12px; margin-bottom:15px;
+            border-radius:5px; font-size:16px; display:none;
+        }
+
+        .details-right .add-to-cart {
+            background:#3c5aa6; color:white; border:none; border-radius:5px; padding:15px 30px; font-size:18px; cursor:pointer; width:100%; margin-bottom:20px;
+        }
+
+        .details-right .close-details {
+            background:#ddd; color:#333; border:none; border-radius:5px; padding:10px 20px; font-size:16px; cursor:pointer;
+        }
+
+        /* 保存日志按钮容器 */
+        .save-log-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .save-log-container button {
+            background:#007acc; color:white; border:none; border-radius:25px; padding:8px 15px; cursor:pointer; font-size:14px;
+            transition: background 0.3s;
+        }
+
+        .save-log-container button:hover {
+            background:#005fa3;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="intro-container" id="introContainer">
+        <div class="intro-content">
+            <h1>Welcome to StyleMate Fashion Brand!</h1>
+            <p>With the popularity of online shopping, selecting items online has become a part of our lives. To make your shopping experience easier and more enjoyable, we have launched the "Style Assistant" smart assistant, which accurately recommends products based on your needs.</p>
+            <p>Imagine this: You are looking for a shell jacket for a skiing trip. Simply input your requirements through a conversation, and you can find the ideal style. Next, you will interact with the "Style Assistant":</p>
+            <ul>
+                <li>Receive messages from the smart assistant</li>
+                <li>Reply naturally based on your preferences</li>
+                <li>Chat as comfortably as with a friend</li>
+            </ul>
+            <p>Are you ready? Let the "Style Assistant" be your shopping partner and embark on a pleasant shopping journey together!</p>
+            <div class="intro-button-container">
+                <a class="next-arrow-btn" id="proceedBtn">Click to Start Chat &rarr;</a> 
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="header">
+            <!-- Dynamic rotating and search-like star logo -->
+            <svg class="star-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                <path fill="#FFD700" d="M287.9 17.8L354 150.2 499.5 171.5C519.8 173.7 529.9 196.1 514.4 209.5L406.6 303.4 430.6 448.5C433.1 468.8 413.9 483.7 399.4 475.3L288 410.6 176.6 475.3C162.1 483.7 142.9 468.8 145.4 448.5L169.4 303.4 61.6 209.5C46.1 196.1 56.2 173.7 76.5 171.5L222 150.2 287.1 17.8C293.9 0.6 302.1 0.6 307.9 17.8H287.9z"/>
+                <circle cx="448" cy="448" r="80" stroke="#FFD700" stroke-width="30" fill="none" />
+                <line x1="512" y1="512" x2="576" y2="576" stroke="#FFD700" stroke-width="30" stroke-linecap="round"/>
+            </svg>
+            <h2>Style Assistant</h2>
+        </div>
+
+        <div class="chat-content" id="messages">
+            <div class="message assistant-msg">
+                Hello! I am your shopping assistant, happy to serve you. What type of jacket are you looking to purchase today?
+                <div class="option-buttons">
+                    <button class="preset-question-btn">I need a jacket suitable for rainy days</button>
+                    <button class="preset-question-btn">I want a winter snowboard jacket</button>
+                    <button class="preset-question-btn">I need a lightweight outdoor jacket</button>
+                    <button class="preset-question-btn">I need a dark-colored windproof jacket</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 在输入栏上方增加保存日志按钮 -->
+        <div class="save-log-container">
+            <button id="saveLogBtn">Save Chat Logs</button>
+        </div>
+
+        <div class="chat-input-bar" id="chatInputBar">
+            <input type="text" id="chatInput" placeholder="Enter your requirements..." />
+            <button id="chatSendBtn">Send</button>
+        </div>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div class="product-details" id="productDetails">
+        <div class="product-details-content">
+            <div class="details-left">
+                <img id="detailsImage" src="" alt="Product Details">
+                <div class="image-nav">
+                    <button id="prevImage">Previous</button>
+                    <button id="nextImage">Next</button>
+                </div>
+            </div>
+            <div class="details-right">
+                <h2 id="detailsName">Product Name</h2>
+                <div class="price" id="detailsPrice">$0</div>
+                <div class="size-label">Select size:</div>
+                <div class="sizes">
+                    <span>S</span>
+                    <span>M</span>
+                    <span>L</span>
+                    <span>XL</span>
+                    <span>2XL</span>
+                </div>
+                <div class="cart-message" id="cartMessage">Item added to cart!</div>
+                <button class="add-to-cart" id="addToCartBtn">Add to cart</button>
+                <button class="close-details" id="closeDetails">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const proceedBtn = document.getElementById('proceedBtn');
+        const introContainer = document.getElementById('introContainer');
+        const chatContainer = document.getElementById('chatContainer');
+        const messages = document.getElementById('messages');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+        const productDetails = document.getElementById('productDetails');
+        const detailsName = document.getElementById('detailsName');
+        const detailsPrice = document.getElementById('detailsPrice');
+        const detailsImage = document.getElementById('detailsImage');
+        const closeDetails = document.getElementById('closeDetails');
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        const cartMessage = document.getElementById('cartMessage');
+        const prevImage = document.getElementById('prevImage');
+        const nextImage = document.getElementById('nextImage');
+        const saveLogBtn = document.getElementById('saveLogBtn'); // 保存日志按钮
+
+        let userPreferences = {};
+        let recommendationShown = false;
+        let loadingMessage = null; 
+        let currentProductId = null;
+        let currentImageIndex = 0;
+
+        const products = {
+            1: { 
+                name: "Men’s Warm and Durable Snowboard Jacket", 
+                price: "$180.00",
+                images: ["W1F.avif","W1B.avif","W1C.avif"]
+            },
+            2: { 
+                name: "Rainproof Jacket 2", 
+                price: "$180.00",
+                images: ["W2F.avif","W2B.avif","W2C.avif"]
+            },
+            3: { 
+                name: "Insulated Jacket 3", 
+                price: "$220.00",
+                images: ["W3F.avif","W3B.avif","W3C.avif"]
+            },
+            4: { 
+                name: "Lightweight Jacket 4", 
+                price: "$150.00",
+                images: ["W4F.avif","W4B.avif","W4C.avif"]
+            },
+        };
+
+        proceedBtn.addEventListener('click', () => {
+            introContainer.style.display = 'none';
+            chatContainer.style.display = 'flex';
+        });
+
+        function addMessage(text, isUser=false) {
+            const msg = document.createElement('div');
+            msg.className = 'message ' + (isUser ? 'user-msg' : 'assistant-msg');
+            msg.textContent = text;
+            messages.appendChild(msg);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        chatSendBtn.addEventListener('click', () => {
+            const userText = chatInput.value.trim();
+            if(!userText) return;
+            addMessage(userText, true);
+            chatInput.value = '';
+        });
+
+        chatInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                chatSendBtn.click();
+            }
+        });
+
+        function addLoadingMessage() {
+            loadingMessage = document.createElement('div');
+            loadingMessage.className = 'message assistant-msg';
+            loadingMessage.innerHTML = `Please wait, I am preparing the recommendation list
+            <span class="loading-dots"></span><span class="loading-dots"></span><span class="loading-dots"></span>`;
+            messages.appendChild(loadingMessage);
+            scrollToBottom();
+        }
+
+        function removeLoadingMessage() {
+            if(loadingMessage) {
+                messages.removeChild(loadingMessage);
+                loadingMessage = null;
+            }
+        }
+
+        function bindPresetQuestionButtons() {
+            document.querySelectorAll('.preset-question-btn').forEach(btn => {
+                btn.addEventListener('click', ()=>{
+                    const userText = btn.textContent.trim();
+                    addMessage(userText, true);
+                    userPreferences.demand = userText;
+                    setTimeout(()=>{
+                        addMessage("Alright, I understand your needs! To better understand how the jacket looks when worn, I would like to introduce a personalized display feature (AI models can be customized based on gender, age, and facial expressions). Would you like to participate?", false);
+                        // Delay to show buttons
+                        setTimeout(showYesNoButtons, 500);
+                    }, 500);
+                });
+            });
+        }
+
+        function showYesNoButtons() {
+            const container = document.createElement('div');
+            container.className = 'selection-container'; 
+            container.innerHTML = `
+                <button class="yes-no-btn" data-value="yes">Yes</button>
+                <button class="yes-no-btn" data-value="no">No</button>
+            `;
+            messages.appendChild(container);
+            scrollToBottom();
+        }
+
+        messages.addEventListener('click', (e) => {
+            if(e.target.classList.contains('yes-no-btn')) {
+                const value = e.target.getAttribute('data-value');
+                if(value === 'yes') {
+                    addMessage("Yes, I would like to.", true);
+                    setTimeout(()=>{
+                        addMessage("Thank you very much! Please tell me which gender model you would like to display these jackets on?", false);
+                        // Delay to show buttons
+                        setTimeout(showGenderButtons, 500);
+                    }, 500);
+                } else {
+                    addMessage("Alright, we will recommend a few jackets that suit your needs. Please wait a moment...", false);
+                    setTimeout(()=>{
+                        addLoadingMessage();
+                        // Show recommendations after 8 seconds
+                        setTimeout(()=>{
+                            removeLoadingMessage();
+                            showRecommendation();
+                        },8000);
+                    }, 1000);
+                }
+            }
+
+            if(e.target.classList.contains('gender-btn')) {
+                const gender = e.target.getAttribute('data-value');
+                addMessage(e.target.textContent.trim(), true);
+                userPreferences.gender = gender;
+                setTimeout(()=>{
+                    addMessage("Understood! What age group of the model do you prefer?", false);
+                    // Delay to show buttons
+                    setTimeout(showAgeButtons, 500);
+                }, 500);
+            }
+
+            if(e.target.classList.contains('age-btn')) {
+                const age = e.target.getAttribute('data-value');
+                addMessage(age, true);
+                userPreferences.age = age;
+                setTimeout(()=>{
+                    addMessage("Okay, we will prepare a " + age + (userPreferences.gender==="female"?" female":" male") + " model. To make the display more vivid, what kind of expression would you like the model to show?", false);
+                    // Delay to show buttons
+                    setTimeout(showExpressionButtons, 500);
+                }, 500);
+            }
+
+            if(e.target.classList.contains('expression-btn')) {
+                const expr = e.target.getAttribute('data-value');
+                addMessage(expr, true);
+                userPreferences.expression = expr;
+                setTimeout(()=>{
+                    addMessage("Understood! We will arrange a " + userPreferences.age + (userPreferences.gender==="female"?" female":" male") + " model to display a " + (expr==="smile"?"smiling":"natural or focused") + " expression. Please wait...", false);
+                    addLoadingMessage();
+                    // Show recommendations after 8 seconds
+                    setTimeout(()=>{
+                        removeLoadingMessage();
+                        showRecommendation();
+                    }, 8000);
+                }, 500);
+            }
+
+            if(e.target.classList.contains('done-view-btn')) {
+                addMessage("After viewing these products, do you have any preferred styles? If there are no suitable items, it's okay to end this consultation at any time.", false);
+                showEndChatButton();
+            }
+
+            if(e.target.classList.contains('end-chat-btn')) {
+                addMessage("Thank you for using the shopping assistant service! If you have any other needs, feel free to consult us anytime. Happy shopping!", false);
+            }
+
+            if(e.target.tagName === 'IMG' && e.target.closest('.product-card')) {
+                const productId = e.target.closest('.product-card').getAttribute('data-id');
+                if(productId) {
+                    showProductDetails(productId);
+                }
+            }
+        });
+
+        function showGenderButtons() {
+            const container = document.createElement('div');
+            container.className = 'selection-container';
+            container.innerHTML = `
+                <button class="gender-btn" data-value="male">Male Model</button>
+                <button class="gender-btn" data-value="female">Female Model</button>
+                <button class="gender-btn" data-value="any">No Preference</button>
+            `;
+            messages.appendChild(container);
+            scrollToBottom();
+        }
+
+        function showAgeButtons() {
+            const container = document.createElement('div');
+            container.className = 'selection-container';
+            container.innerHTML = `
+                <button class="age-btn" data-value="20-30 years">20-30 years</button>
+                <button class="age-btn" data-value="30-40 years">30-40 years</button>
+                <button class="age-btn" data-value="40 years and above">40 years and above</button>
+            `;
+            messages.appendChild(container);
+            scrollToBottom();
+        }
+
+        function showExpressionButtons() {
+            const container = document.createElement('div');
+            container.className = 'selection-container';
+            container.innerHTML = `
+                <button class="expression-btn" data-value="smile">Smile</button>
+                <button class="expression-btn" data-value="nature">Natural</button>
+                <button class="expression-btn" data-value="focus">Focused</button>
+            `;
+            messages.appendChild(container);
+            scrollToBottom();
+        }
+
+        function showRecommendation() {
+            addMessage("Based on your selections, we have prepared the following 4 jackets.", false);
+
+            const productContainer = document.createElement('div');
+            productContainer.innerHTML = `
+                <div class="recommendation-container">
+                    <div class="product-card" data-id="1">
+                        <img src="W1F.avif" alt="Coat 1">
+                        <p>Men’s Warm and Durable Snowboard Jacket</p>
+                        <p class="price">$180.00</p>
+                    </div>
+                    <div class="product-card" data-id="2">
+                        <img src="W2F.avif" alt="Coat 2">
+                        <p>Rainproof Jacket 2</p>
+                        <p class="price">$180.00</p>
+                    </div>
+                    <div class="product-card" data-id="3">
+                        <img src="W3F.avif" alt="Coat 3">
+                        <p>Insulated Jacket 3</p>
+                        <p class="price">$220.00</p>
+                    </div>
+                    <div class="product-card" data-id="4">
+                        <img src="W4F.avif" alt="Coat 4">
+                        <p>Lightweight Jacket 4</p>
+                        <p class="price">$150.00</p>
+                    </div>
+                </div>
+                <p style="margin-top:20px; color:#333; font-size:14px;">
+                    You can click on the product images to view details. If you find a style you like, let me know to place an order for you.
+                </p>
+            `;
+            messages.appendChild(productContainer);
+            scrollToBottom();
+
+            recommendationShown = true;
+
+            // Show "I have finished viewing all recommended products" button after 1 minute
+            setTimeout(()=>{
+                if(recommendationShown) {
+                    const msgDone = document.createElement('div');
+                    msgDone.className = 'message assistant-msg done-button-container';
+                    msgDone.style.display = 'flex';
+                    msgDone.innerHTML = `<button class="done-view-btn">I have finished viewing all recommended products</button>`;
+                    messages.appendChild(msgDone);
+                    scrollToBottom();
+                }
+            }, 60000);
+        }
+
+        function showEndChatButton() {
+            const msg = document.createElement('div');
+            msg.className = 'message assistant-msg done-button-container';
+            msg.innerHTML = `
+                <div class="option-buttons">
+                    <button class="end-chat-btn">End Chat</button>
+                </div>
+            `;
+            messages.appendChild(msg);
+            scrollToBottom();
+        }
+
+        function showProductDetails(productId) {
+            currentProductId = productId;
+            const product = products[productId];
+            detailsName.textContent = product.name;
+            detailsPrice.textContent = product.price;
+            currentImageIndex = 0;
+            detailsImage.src = product.images[currentImageIndex];
+            productDetails.classList.add('visible');
+        }
+
+        closeDetails.addEventListener('click', () => {
+            productDetails.classList.remove('visible');
+        });
+
+        addToCartBtn.addEventListener('click', () => {
+            cartMessage.style.display = 'block';
+            setTimeout(() => {
+                cartMessage.style.display = 'none';
+            }, 2000);
+        });
+
+        prevImage.addEventListener('click', () => {
+            const product = products[currentProductId];
+            currentImageIndex = (currentImageIndex - 1 + product.images.length) % product.images.length;
+            detailsImage.src = product.images[currentImageIndex];
+        });
+
+        nextImage.addEventListener('click', () => {
+            const product = products[currentProductId];
+            currentImageIndex = (currentImageIndex + 1) % product.images.length;
+            detailsImage.src = product.images[currentImageIndex];
+        });
+
+        // Function to save logs as a text file
+        function saveLogs() {
+            const messageElements = document.querySelectorAll('.message');
+            let logs = '';
+            messageElements.forEach(m => {
+                // 标记用户和助手消息，方便区分
+                const prefix = m.classList.contains('user-msg') ? 'User: ' : 'Assistant: ';
+                logs += prefix + m.textContent.trim() + '\n';
+            });
+
+            const blob = new Blob([logs], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chat_logs.txt';
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        saveLogBtn.addEventListener('click', saveLogs);
+
+        // Initialize binding of preset question buttons
+        bindPresetQuestionButtons();
+    </script>
+</body>
+</html>
